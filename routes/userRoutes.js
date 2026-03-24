@@ -37,12 +37,11 @@ router.post("/login",async(req,res)=>{
   if(username.endsWith(".com")){
     inputEmail=username;
   }
-  console.log(inputEmail);
     const user = await User.findOne({
       $or:[{username:username},{email:inputEmail}]
     });
     if(!user)return res.status(404).json({message:'Invalid credentials',success:false})
-    
+
     res.json(user)
 
 })
