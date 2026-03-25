@@ -1,6 +1,7 @@
 require("dotenv").config({ quiet: true });
 const express = require("express");
 const User = require("../models/userModels");
+const authMiddleware =require("../middleware/authMiddleware")
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const router = express.Router();
@@ -64,10 +65,18 @@ router.post("/login", async (req, res) => {
   console.log(comparedPass);
   if(!comparedPass)return res.status(400).json({ message: "Invalid credentials", success: false });
   const token = generateToken({_id:user._id,username:user.username})
-  res.json(token);
+  res.status(200).json(token);
 });
 
-//*==> common functions
+//user logged in or not
+router.get("/",authMiddleware,async(req,res)=>{
+  const user = await User.findById(req.user._id).select("-password -__v");
+  res.send(user);
+})
+
+
+//? ----------------------------------- common functions ---------------------------------- */
+
 const generateToken = (data) => {
   return jwt.sign(data, process.env.JWT_KEY);
 };
