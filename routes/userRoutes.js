@@ -4,6 +4,7 @@ const User = require("../models/userModels");
 const authMiddleware = require("../middleware/authMiddleware");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+const sendSMTPEmail = require("../config/smtp");
 const router = express.Router();
 
 router.post("/", async (req, res) => {
@@ -78,7 +79,7 @@ router.get("/", authMiddleware, async (req, res) => {
 // resetting password
 router.post("/request-reset-password", async (req, res) => {
   const { email } = req.body;
-  const user = await User.findOne({ email: email });
+  let user = await User.findOne({ email: email });
   if (!user)
     return res
       .status(404)
@@ -90,6 +91,14 @@ router.post("/request-reset-password", async (req, res) => {
   const resetToken = jwt.sign({ _id: user._id }, process.env.JWT_KEY, {
     expiresIn: "1h",
   });
+  user.resetToken=resetToken;
+  user.resetTokenExpires=Date.now()*60*60*1000;
+  await user.save();
+//send email with this token
+const subject = "Password reset request for your linkify account."
+const text = `click this link to reset your password: https://ourlinkify.com/reset-request-password?resetToken=${resetToken}`
+  sendSMTPEmail(user.email,subject,text);
+
   res
     .status(201)
     .json({
@@ -113,6 +122,11 @@ router.post("/reset-password", async (req, res) => {
   await user.save();
   res.json({message:"Password reset successfully",success:true});
 });
+
+router.post("/:userId/following",authMiddleware,async(req,res)=>{
+  const userId = req.body.id;
+
+})
 
 //? ----------------------------------- common functions ---------------------------------- */
 
