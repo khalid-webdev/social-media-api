@@ -27,6 +27,8 @@ const userSchema = new mongoose.Schema({
   isPrivate: { type: Boolean, default: false },
   gender: { type: String, enum: ["male", "female", "others"] },
   phoneNumber: { type: String, trim: true },
+  resetToken:{type:String},
+  resetTokenExpires:{type:Date}
 });
 const User = mongoose.model("User", userSchema);
 

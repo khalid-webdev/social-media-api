@@ -1,5 +1,5 @@
-require("./config/smtp.js")
 require("dotenv").config({quiet:true})
+require("./config/smtp.js")
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
