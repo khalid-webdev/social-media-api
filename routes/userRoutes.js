@@ -128,8 +128,43 @@ router.post("/reset-password", async (req, res) => {
 });
 
 router.post("/:userId/following",authMiddleware,async(req,res)=>{
-  const userId = req.body.id;
+  const userId = req.params.userId;
+  const currentUserId = req.user._id;
+//checking same user is trying to follow
+if(userId===currentUserId){
+  return res.status(400).json({message:"You can't follow yourself!!!",success:false});
+}
+const followUser = await User.findById(userId);
+if(!followUser){
+  return res.status(404).json({message:"User not found"});
+}
+const currentUser = await User.findById(currentUserId);
+if(!currentUserId){
+  return res.status(404).json({message:"User not found"});
+}
 
+if(followUser.isPrivate){
+  //logic for private account
+  if(followUser.followRequest.includes(currentUserId)){
+    return res.status(400).json({message:"Follow request already sent!"})
+  }else{
+    followUser.followRequest.push(currentUserId);
+    await followUser.save();
+    return res.json({message:"follow request sent."});
+  }
+}else{
+  //logic for public account
+  //already following that user
+  if(followUser.followers.includes(currentUserId)){
+    return res.status(400).json({message:"Already following the user!"})
+  }else{
+  followUser.followers.push(currentUserId);
+  currentUser.following.push(userId);
+  await followUser.save();
+  await currentUser.save();
+  return res.status(200).json({message:"User followed successfully."})
+  }
+}
 })
 
 //? ----------------------------------- common functions ---------------------------------- */

@@ -28,7 +28,10 @@ const userSchema = new mongoose.Schema({
   gender: { type: String, enum: ["male", "female", "others"] },
   phoneNumber: { type: String, trim: true },
   resetToken:{type:String},
-  resetTokenExpires:{type:Date}
+  resetTokenExpires:{type:Date},
+  followers:[{type:mongoose.Schema.Types.ObjectId, ref:'User'}],
+  following:[{type:mongoose.Schema.Types.ObjectId, ref:'User'}],
+  followRequest:[{type:mongoose.Schema.Types.ObjectId, ref:'User'}],
 });
 const User = mongoose.model("User", userSchema);
 
